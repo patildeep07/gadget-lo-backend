@@ -63,10 +63,7 @@ const updateUser = async (userId, newDetails) => {
 
 const addToWishlist = async (userId, productId) => {
   try {
-    const foundUser = await User.findById(userId).populate(
-      "wishlist.product",
-      "_id productName brandName price discountPrice averageRating productImage",
-    );
+    const foundUser = await User.findById(userId);
 
     if (foundUser) {
       const index = foundUser.wishlist.findIndex(
@@ -85,16 +82,12 @@ const addToWishlist = async (userId, productId) => {
 
         return { message: "Added to wishlist", user };
       } else {
-        foundUser.wishlist[index].quantity += 1;
-
-        await foundUser.save();
-
         const user = await foundUser.populate(
           "wishlist.product",
           "_id productName brandName price discountPrice averageRating productImage",
         );
 
-        return { message: "Product quantity updated!", user };
+        return { message: "Product exists in wishlist!", user };
       }
     } else {
       return { message: "Failed to add product in wishlist" };
@@ -268,6 +261,31 @@ const modifyCartProductQuantity = async (userId, productId, givenQuantity) => {
   }
 };
 
+// 10. Place your order (empty cart)
+
+const emptyCart = async (userId) => {
+  try {
+    const foundUser = await User.findById(userId);
+
+    if (foundUser) {
+      foundUser.cart = [];
+
+      await foundUser.save();
+
+      const user = await foundUser.populate(
+        "cart.product",
+        "_id productName brandName price discountPrice averageRating productImage",
+      );
+
+      return { message: "Order successfully placed", user };
+    } else {
+      return { message: "Failed to place order" };
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // Export controller functions
 
 module.exports = {
@@ -280,4 +298,5 @@ module.exports = {
   deleteFromCart,
   modifyWishlistProductQuantity,
   modifyCartProductQuantity,
+  emptyCart,
 };
