@@ -1,7 +1,7 @@
 const { initialiseDatabase } = require("./db/db.connect");
 
 // Importing libraries
-
+const bcrypt = require("bcryptjs")
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
