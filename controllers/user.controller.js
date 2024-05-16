@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs")
 
 const User = require("../models/user.model");
 
@@ -7,7 +8,11 @@ const User = require("../models/user.model");
 // 1. Create a new user
 const addUser = async (newUserDetails) => {
   try {
-    const user = await User(newUserDetails);
+    const {password} = newUserDetails
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
+    const user = await User({...newUserDetails, password: hashedPassword});
 
     const newUser = await user.save();
 
@@ -29,7 +34,7 @@ const login = async (userDetails) => {
     );
 
     if (matchedUser) {
-      if (matchedUser.password === password) {
+      if (bcrypt.compare(password, matchedUser.password )) {
         return { message: "User logged in", user: matchedUser };
       } else {
         return { message: "Incorrect password" };
